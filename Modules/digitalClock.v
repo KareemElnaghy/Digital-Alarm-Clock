@@ -29,31 +29,32 @@ wire clk_200, clk_1,clk_buzzer_3;
 wire[4:0] buttonsPressed;
 reg [15:0] clockDigits, alarmDigits;
 reg enableClock;
-reg [1:0] enableMins_Hours;
+reg [1:0] enableMins_Hours;        // 2 bit enable where MSB represents whether we are pressing the increment or decrement button and LSB represents hours if 0 and minutes if 1
 reg upDown;
 reg clockInput;
 reg adjustAlarm;
 
-
+// Clock Dividers to generate the three needed frequencies
 clockDivider #(250000)div1(clk, rst, clk_200);
 clockDivider #(50000000)div2(clk, rst, clk_1);
 clockDivider #(15000000)div3(clk, rst, clk_buzzer_3);
 
+//push button detectors
 pushButtonDetector BTNC(clk_200,rst,center,buttonsPressed[4]);
 pushButtonDetector BTNL(clk_200,rst,left,buttonsPressed[3]);
 pushButtonDetector BTNR(clk_200,rst,right,buttonsPressed[2]);
 pushButtonDetector BTNU(clk_200,rst,up,buttonsPressed[1]);
 pushButtonDetector BTND(clk_200,rst,down,buttonsPressed[0]);
 
+//Two Counters one for the clock time and one for the alarm time    
 minSecHourCount mainClock( .clk(clockInput), .rst(rst), .en(enableClock),.adjustAlarm(adjustAlarm),.enableMins_Hours(enableMins_Hours),.upDown(upDown), .displayDigits(countTime), .secondDigits(countSeconds));
-
 alarmHourMinCounter alarm( .clk(clockInput), .rst(rst), .en(adjustAlarm),.enableMins_Hours(enableMins_Hours),.upDown(upDown), .displayDigits(countAlarm));
 
-//FSM
+//FSM with 6 states, the default clock mode, alarm mode, adjusting the hours and minutes of the clock, and adjusting the alarm hour and minutes
 reg [2:0] state, nextState;
 parameter [2:0] clock=3'b000, timeHours=3'b001, timeMins=3'b010, alarmHours=3'b011, alarmMins=3'b100, triggerAlarm = 3'b101; // States Encoding 
-always @ (buttonsPressed or state)               // TH, TM, AH, AM
-case (state)                                     // MSB Adjusting or Not, LSB 0- Hours 1 - Mins
+always @ (buttonsPressed or state)           
+case (state)                                     
 clock: if (buttonsPressed == 5'b10000)
     begin
          nextState = timeHours;
@@ -331,16 +332,18 @@ else
 default: nextState = clock;
 endcase
 
+    
 always @ (posedge clk_200 or posedge rst) begin
 if(rst) state <= clock;
 else state <= nextState;
 end
-
+//assignment of LEDS
 assign LD12 = (state == timeHours) ? 1:0;
 assign LD13 = (state == timeMins) ? 1:0;
 assign LD14 = (state == alarmHours) ? 1:0;
 assign LD15 = (state == alarmMins) ? 1:0;
 
+//Logic behind LD0 which has multiple cases
 always @ (*) begin
     if(state == clock) begin
         LD0 = 0;
@@ -356,36 +359,23 @@ always @ (*) begin
     end                                  
 end
 
-always @ (*) begin
-    if(state == clock) begin
-        LD0 = 0;
-        buzzer = 0;
-        end
-    else if (state == triggerAlarm) begin
-        LD0 = (~clk_1);
-        buzzer = (~clk_buzzer_3);
-    end
-    else begin
-        LD0 = 1;
-        buzzer = 0;
-    end                                  
-end
 
-//Display
+//Display Section
  
-counter_x_bit #(2,4) select(.clk(clk_200), .reset(0),.en(1), .count(s));
-mux4x1 Mux1(.data_in_0(countAlarm[15:12]),.data_in_1(countAlarm[11:8]),.data_in_2(countAlarm[7:4]),.data_in_3(countAlarm[3:0]),.sel(s), .data_out(muxOut1));
-mux4x1 Mux2(.data_in_0(countTime[15:12]),.data_in_1(countTime[11:8]),.data_in_2(countTime[7:4]),.data_in_3(countTime[3:0]),.sel(s), .data_out(muxOut2));
+counter_x_bit #(2,4) select(.clk(clk_200), .reset(0),.en(1), .count(s));        //2-bit counter acts as selection line for mux and used for deciding which anode is active
+mux4x1 Mux1(.data_in_0(countAlarm[15:12]),.data_in_1(countAlarm[11:8]),.data_in_2(countAlarm[7:4]),.data_in_3(countAlarm[3:0]),.sel(s), .data_out(muxOut1));    //4x1 Mux for Alarm Digits
+mux4x1 Mux2(.data_in_0(countTime[15:12]),.data_in_1(countTime[11:8]),.data_in_2(countTime[7:4]),.data_in_3(countTime[3:0]),.sel(s), .data_out(muxOut2));    //4x1 Mux of clock digits
 
+//2x1 Mux to select between displaying Alarm Time or Clock
 reg [3:0] value;
 always @(*)begin
 if(adjustAlarm) value = muxOut1;
 else value = muxOut2;
 end
 
-SevenSegDecWithEn seg(.en(s),.in(value),.segments(segments), .anode_active(anode_active));  
+    SevenSegDecWithEn seg(.en(s),.in(value),.segments(segments), .anode_active(anode_active));  // Module which outputs the segments to activate on the 7 segment display and which anode to activate 
 
-always @ (*) begin
+    always @ (*) begin    // Blinking Decimal Point in Clock mode
     if((anode_active == 4'b1011) & enableClock) decimalPt = clk_1;
     else decimalPt = 1;
 end
