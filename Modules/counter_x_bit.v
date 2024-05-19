@@ -27,14 +27,14 @@ begin
     if (reset == 1) count <= 0;
     
     else
-        if(en == 1)
+        if(en == 1)        
             begin
-                if(upDown == 1)
+                if(upDown == 1)        // Up counting, mod n
                     if(count == n-1) count<=0;
                     else count<= count + 1;
             
             else
-                begin
+                begin            // Down Counting, resets at zero to n-1
                      if(count == 0) count<=n-1;
                      else count <= count - 1;
                 end 
