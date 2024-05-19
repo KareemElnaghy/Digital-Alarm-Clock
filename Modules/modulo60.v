@@ -21,7 +21,7 @@
 
 
 module modulo60(input clk, rst, en,upDown,output [5:0] count);
-//wire clk_out;
-counter_x_bit  #(6,60) mod60 (.clk(clk), .reset(rst), .en(en),.upDown(upDown), .count(count));
-//counter_x_bit  #(6,60) mod60 (.clk(clk_out), .reset(rst), .en(en), .count(count));
+
+counter_x_bit  #(6,60) mod60 (.clk(clk), .reset(rst), .en(en),.upDown(upDown), .count(count)); // Calls the counter passing appropriate parameters
+
 endmodule
