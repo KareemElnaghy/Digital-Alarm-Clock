@@ -45,11 +45,3 @@ end
 assign z = (state == B);
 
 endmodule
-
-//        ******    <- INSERT NAME HERE
-//      ( o   o  )
-//      (   ||    )
-//       ( #### )
-//        _______
-//    ___
-//   ___
