@@ -3,7 +3,7 @@
 Group 3 Members: Arwa Abdelkarim, Jana Elfeky, Kareem Elnaghy
 
 ## Introduction
-Welcome to the Digital Alarm Clock project! This project is implemented on the BASYS3 FPGA board using Verilog HDL on Vivado software. The clock features time display, alarm functionality, and adjustable settings through the board's push buttons, LEDs, and a buzzer. This project highlights fundamental digital design concepts, including counters and finite state machines (FSM).
+Welcome to the Digital Alarm Clock project. This project is implemented on the BASYS3 FPGA board using Verilog HDL on Vivado software. The clock features time display, alarm functionality, and adjustable settings through the board's push buttons, LEDs, and a buzzer. This project highlights fundamental digital design concepts, including counters and finite state machines (FSM).
 
 ## Objectives
 - **Time Display:** Display the current time in hours and minutes on a 7-segment display.
