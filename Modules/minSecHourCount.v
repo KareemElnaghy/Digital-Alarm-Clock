@@ -29,12 +29,13 @@ wire enableMins, enableHours;
 
 modulo60 secondsCounter(.clk(clk), .rst(rst), .en(en),.upDown(1), .count(seconds));
 
-assign enableMins = en ? (seconds == 59): (enableMins_Hours[0] & enableMins_Hours[1]);
-modulo60 minutesCounter(.clk(clk), .rst(rst), .en((~adjustAlarm) & enableMins),.upDown(upDown), .count(minutes));
+assign enableMins = en ? (seconds == 59): (enableMins_Hours[0] & enableMins_Hours[1]);  
+modulo60 minutesCounter(.clk(clk), .rst(rst), .en((~adjustAlarm) & enableMins),.upDown(upDown), .count(minutes)); // Enables either when seconds reset to zero in clock mode or if we are incrementing or decrementing when adjusting the clock.
 
 assign enableHours = en ? ((minutes==59) &(seconds ==59)): ((~enableMins_Hours[0]) & enableMins_Hours[1]);
-modulo24 hoursCounter(.clk(clk), .rst(rst), .en((~adjustAlarm)& enableHours),.upDown(upDown), .count(hours));
+modulo24 hoursCounter(.clk(clk), .rst(rst), .en((~adjustAlarm)& enableHours),.upDown(upDown), .count(hours));  // Enables either when seconds and minutes reset to zero in clock mode or if we are incrementing or decrementing when adjusting the clock.
 
+// Module outputs the digits split into units and tens represented using 4 bits to be converted in 7 segment
 assign displayDigits[3:0] = minutes%10;
 assign displayDigits[7:4] = minutes/10; 
 assign displayDigits[11:8] = hours%10;
