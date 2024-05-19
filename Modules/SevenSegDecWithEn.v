@@ -23,14 +23,14 @@
 module SevenSegDecWithEn(input [1:0] en,input [3:0] in,output reg [6:0] segments, output reg [3:0] anode_active);
 
 always @ (in,en) begin
-    case(en)
+    case(en)    //selects anode based on output of 2 bit counter
         0: anode_active= 4'b0111;
         1: anode_active = 4'b1011;
         2: anode_active = 4'b1101;
         3: anode_active = 4'b1110;
     endcase
 
-     case(in)
+    case(in)    // Selects which number to display based on 4 bit count value
           0: segments = 7'b0000001; 
           1: segments = 7'b1001111;
           2: segments = 7'b0010010;
