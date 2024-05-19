@@ -21,7 +21,7 @@
 
 
 module modulo24(input clk, rst, en,upDown,output [4:0] count);
-//wire clk_out;
-counter_x_bit  #(5,24) mod24 (.clk(clk), .reset(rst), .en(en),.upDown(upDown), .count(count));
-//counter_x_bit  #(5,24) mod24 (.clk(clk_out), .reset(rst), .en(en), .count(count));
+
+counter_x_bit  #(5,24) mod24 (.clk(clk), .reset(rst), .en(en),.upDown(upDown), .count(count));  // Calls the counter passing appropriate parameters
+
 endmodule
